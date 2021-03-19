@@ -33,6 +33,7 @@ app.get('/api/v1/nft', (req, res) => {
   });
 });
 
+// TODO: Get the actual id, not the index
 app.get('/api/v1/nft/:id', (req, res) => {
   if (req.params.id * 1 < nfts.length) {
     res.status(200).json({
@@ -88,6 +89,17 @@ app.post('/api/v1/nft', (req, res) => {
   });
 });
 
+// TODO: Will get sender's id and new owner
+app.patch('/api/v1/nft/:id', (req, res) => {
+  const nft = nfts.find((n) => n.id == req.params.id);
+  console.log(nft);
+  res.status(200).json({
+    status: 'success',
+    data: {
+      nft: 'updated nft here',
+    },
+  });
+});
 app.listen(PORT, () =>
   console.log(`Example app listening on port ${PORT}!`)
 );
