@@ -1,8 +1,1 @@
-[
-  {
-    "id": "cf56029ad88a2c2d7ac239d55746346e6e031344dd406eccfa9c7f12bced1843",
-    "name": "NFT Name",
-    "price": "2.0000",
-    "owner": "0xaddressofowner"
-  }
-]
+[{"id":"cf56029ad88a2c2d7ac239d55746346e6e031344dd406eccfa9c7f12bced1843","name":"NFT Name","price":"2.0000","owner":"0xaddressofowner"},{"id":"cf56029ad88a2c2d7ac239d55746346e6e031344dd406eccfa9c7f12bced1843","name":"NFT Name","price":"2.0000","owner":"0xaddressofowner"}]
