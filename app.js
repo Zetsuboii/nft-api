@@ -9,7 +9,7 @@ const PORT = 3000;
 app.use(express.json());
 
 const hash = crypto.createHash("sha256");
-const decrypt = (i) => {
+const encrypt = (i) => {
   hash.update(i);
   return hash.digest("hex");
 };
@@ -52,12 +52,18 @@ app.post("/api/v1/nft", (req, res) => {
       console.error(err.message);
       return;
     }
-
+    console.log(fields);
     //* Turned out unnecessary, change to .readFileSync()
     const readStr = fs.createReadStream(files.file.path);
     readStr.on("data", (data) => {
       data = addBufferIndex(data);
-      console.log(decrypt(data));
+      const hash_id = encrypt(data);
+      const entry = {
+        id: hash_id,
+        name: fields.name,
+        price: fields.price,
+      };
+      console.log(entry);
     });
   });
   res.send("Done");
