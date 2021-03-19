@@ -48,6 +48,7 @@ app.get("/api/v1/nft/:id", (req, res) => {
   }
 });
 
+// TODO: Validate with Joi
 app.post("/api/v1/nft", (req, res) => {
   const form = new formidable.IncomingForm();
   form.parse(req, (err, fields, files) => {
@@ -60,13 +61,8 @@ app.post("/api/v1/nft", (req, res) => {
     readStr.on("data", (data) => {
       data = addBufferIndex(data);
       const hashId = encrypt(data);
-      //* Change to Object.assign
-      const entry = {
-        id: hashId,
-        name: fields.name,
-        price: fields.price,
-        //? Not sure how to handle files in here correctly, since I'll use DB I don't bother
-      };
+      const entry = Object.assign({ id: hashId }, fields);
+      //? Not sure how to handle files in here correctly, since I'll use DB I won't bother
       nfts.push(entry);
       fs.writeFile(
         dataPathFmt("nft"),

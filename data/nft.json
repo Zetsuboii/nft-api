@@ -1,7 +1,8 @@
 [
   {
-    "id": "5387e7bdcd4701b3fff4512425a9c89e51f95756f47f00ffe4a83f047c9e389a",
-    "name": "zet",
-    "price": "2.0000"
+    "id": "cf56029ad88a2c2d7ac239d55746346e6e031344dd406eccfa9c7f12bced1843",
+    "name": "NFT Name",
+    "price": "2.0000",
+    "owner": "0xaddressofowner"
   }
 ]
