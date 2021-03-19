@@ -28,6 +28,7 @@ const addBufferIndex = (d) =>
 app.get("/api/v1/nft", (req, res) => {
   res.status(200).json({
     status: "success",
+    results: nfts.length,
     data: nfts,
   });
 });
@@ -37,7 +38,7 @@ app.get("/api/v1/nft/:id", (req, res) => {
     res.status(200).json({
       status: "success",
       results: nfts.length,
-      data: nfts[id],
+      data: nfts[req.params.id],
     });
   } else {
     res.status(404).json({
@@ -66,7 +67,20 @@ app.post("/api/v1/nft", (req, res) => {
         price: fields.price,
         //? Not sure how to handle files in here correctly, since I'll use DB I don't bother
       };
-      const newNfts = nfts.push(entry);
+      nfts.push(entry);
+      fs.writeFile(
+        dataPathFmt("nft"),
+        JSON.stringify(nfts),
+        (err) => {
+          if (err) {
+            console.error(err);
+            return;
+          }
+          console.log(
+            "✔ Contents of the nft.json has been updated"
+          );
+        }
+      );
     });
   });
   res.send("Done");
