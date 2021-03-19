@@ -18,24 +18,26 @@ const dataPathFmt = (name) =>
   `${__dirname}/data/${name}.json`;
 
 console.log(dataPathFmt("nft"));
-const nft = JSON.parse(fs.readFileSync(dataPathFmt("nft")));
+const nfts = JSON.parse(
+  fs.readFileSync(dataPathFmt("nft"))
+);
 
 const addBufferIndex = (d) =>
-  Buffer.concat([d, Buffer.from(nft.length + "")]);
+  Buffer.concat([d, Buffer.from(nfts.length + "")]);
 
 app.get("/api/v1/nft", (req, res) => {
   res.status(200).json({
     status: "success",
-    data: nft,
+    data: nfts,
   });
 });
 
 app.get("/api/v1/nft/:id", (req, res) => {
-  if (req.params.id * 1 < nft.length) {
+  if (req.params.id * 1 < nfts.length) {
     res.status(200).json({
       status: "success",
-      results: nft.length,
-      data: nft[id],
+      results: nfts.length,
+      data: nfts[id],
     });
   } else {
     res.status(404).json({
@@ -52,18 +54,19 @@ app.post("/api/v1/nft", (req, res) => {
       console.error(err.message);
       return;
     }
-    console.log(fields);
     //* Turned out unnecessary, change to .readFileSync()
     const readStr = fs.createReadStream(files.file.path);
     readStr.on("data", (data) => {
       data = addBufferIndex(data);
-      const hash_id = encrypt(data);
+      const hashId = encrypt(data);
+      //* Change to Object.assign
       const entry = {
-        id: hash_id,
+        id: hashId,
         name: fields.name,
         price: fields.price,
+        //? Not sure how to handle files in here correctly, since I'll use DB I don't bother
       };
-      console.log(entry);
+      const newNfts = nfts.push(entry);
     });
   });
   res.send("Done");
