@@ -17,10 +17,25 @@ const encrypt = (i) => {
 const dataPathFmt = (name) =>
   `${__dirname}/data/${name}.json`;
 
-console.log(dataPathFmt('nft'));
 const nfts = JSON.parse(
   fs.readFileSync(dataPathFmt('nft'))
 );
+
+const updateNftsFile = () => {
+  return new Promise((resolve, reject) => {
+    fs.writeFile(
+      dataPathFmt('nft'),
+      JSON.stringify(nfts),
+      (err) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        resolve();
+      }
+    );
+  });
+};
 
 const addBufferIndex = (d) =>
   Buffer.concat([d, Buffer.from(nfts.length + '')]);
@@ -51,6 +66,7 @@ app.get('/api/v1/nft/:id', (req, res) => {
 
 // TODO: Validate with Joi
 app.post('/api/v1/nft', (req, res) => {
+  //* Works with "form-data"
   const form = new formidable.IncomingForm();
   form.parse(req, (err, fields, files) => {
     if (err) {
@@ -68,19 +84,13 @@ app.post('/api/v1/nft', (req, res) => {
       const entry = Object.assign({ id: hashId }, fields);
       //? Not sure how to handle files in here correctly, since I'll use DB I won't bother
       nfts.push(entry);
-      fs.writeFile(
-        dataPathFmt('nft'),
-        JSON.stringify(nfts),
-        (err) => {
-          if (err) {
-            console.error(err);
-            return;
-          }
+      updateNftsFile()
+        .then(() =>
           console.log(
-            '✔ Contents of the nft.json has been updated'
-          );
-        }
-      );
+            '✔ Contents of nft.json have been updated'
+          )
+        )
+        .catch((err) => console.log(err));
       res.status(200).json({
         status: 'success',
         data: entry,
@@ -91,14 +101,59 @@ app.post('/api/v1/nft', (req, res) => {
 
 // TODO: Will get sender's id and new owner
 app.patch('/api/v1/nft/:id', (req, res) => {
-  const nft = nfts.find((n) => n.id == req.params.id);
-  console.log(nft);
-  res.status(200).json({
-    status: 'success',
-    data: {
-      nft: 'updated nft here',
-    },
-  });
+  //* Works with "x-www-form-encoded"
+  const form = new formidable.IncomingForm();
+  try {
+    form.parse(req, (err, fields, files) => {
+      if (err) {
+        console.error(err);
+        throw err;
+      }
+      const nft = nfts.find((n) => n.id === req.params.id);
+      if (nft === undefined) {
+        console.log(
+          '❌ No NFT found with id ' + req.params.id
+        );
+        res.status(404).json({
+          status: 'fail',
+          msg: 'invalid ID',
+        });
+      }
+
+      if (fields.address !== nft.owner) {
+        res.status(403).json({
+          status: 'fail',
+          msg:
+            "can't change the ownership of the NFT you don't own",
+        });
+        return;
+      }
+
+      nft.owner = fields.owner;
+      updateNftsFile()
+        .then(() => {
+          console.log(
+            '✔ Contents of nft.json have been updated'
+          );
+          res.status(200).json({
+            status: 'success',
+            data: {
+              nft: nft,
+            },
+          });
+          return;
+        })
+        .catch((err) => {
+          throw err;
+        });
+    });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({
+      status: 'fail',
+      msg: 'internal server error',
+    });
+  }
 });
 app.listen(PORT, () =>
   console.log(`Example app listening on port ${PORT}!`)
