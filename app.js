@@ -68,7 +68,7 @@ const getNftOfId = (req, res) => {
 
 // TODO: Validate with Joi
 const addNft = (req, res) => {
-  //* Works with "form-data"
+  //* Works with "application/form-data"
   const form = new formidable.IncomingForm();
   form.parse(req, (err, fields, files) => {
     if (err) {
@@ -108,55 +108,46 @@ const addNft = (req, res) => {
 };
 
 const changeOwner = (req, res) => {
-  //* Works with "x-www-form-encoded"
-  const form = new formidable.IncomingForm();
-  try {
-    form.parse(req, (err, fields, files) => {
-      if (err) {
-        console.error(err);
-        throw err;
-      }
-      const nft = nfts.find((n) => n.id === req.params.id);
-      if (nft === undefined) {
-        console.log('❌ No NFT found with id ' + req.params.id);
-        res.status(404).json({
-          status: 'fail',
-          msg: 'invalid ID',
-        });
-      }
+  //* Works with "application/json"
+  fields = req.body;
+  const nft = nfts.find((n) => n.id === req.params.id);
 
-      if (fields.address !== nft.owner) {
-        res.status(403).json({
-          status: 'fail',
-          msg: "can't change the ownership of the NFT you don't own",
-        });
-        return;
-      }
-
-      nft.owner = fields.owner;
-      console.log(nfts.find((n) => n.id === req.params.id).owner);
-      updateFile('nft', nfts)
-        .then(() => {
-          console.log('✔ Contents of nft.json have been updated');
-          res.status(200).json({
-            status: 'success',
-            data: {
-              nft: nft,
-            },
-          });
-          return;
-        })
-        .catch((err) => {
-          throw err;
-        });
-    });
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).json({
+  if (nft === undefined) {
+    console.log('❌ No NFT found with id ' + req.params.id);
+    res.status(404).json({
       status: 'fail',
-      msg: 'internal server error',
+      msg: 'invalid ID',
     });
   }
+
+  if (fields.address !== nft.owner) {
+    res.status(403).json({
+      status: 'fail',
+      msg: "can't change the ownership of the NFT you don't own",
+    });
+    return;
+  }
+
+  nft.owner = fields.owner;
+  updateFile('nft', nfts)
+    .then(() => {
+      console.log('✔ Contents of nft.json have been updated');
+      res.status(200).json({
+        status: 'success',
+        data: {
+          nft: nft,
+        },
+      });
+
+      return;
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json({
+        status: 'fail',
+        msg: 'internal server error',
+      });
+    });
 };
 
 const createContract = (req, res) => {
