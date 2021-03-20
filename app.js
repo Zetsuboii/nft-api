@@ -4,6 +4,7 @@ const fs = require('fs');
 const crypto = require('crypto');
 const morgan = require('morgan');
 const { create } = require('domain');
+const { json } = require('express');
 
 const app = express();
 const PORT = 3000;
@@ -26,9 +27,9 @@ const dataPathFmt = (name) => `${__dirname}/data/${name}.json`;
 const nfts = JSON.parse(fs.readFileSync(dataPathFmt('nft')));
 const contracts = JSON.parse(fs.readFileSync(dataPathFmt('contracts')));
 
-const updateNftsFile = () => {
+const updateFile = (path, list) => {
   return new Promise((resolve, reject) => {
-    fs.writeFile(dataPathFmt('nft'), JSON.stringify(nfts), (err) => {
+    fs.writeFile(dataPathFmt(path), JSON.stringify(list), (err) => {
       if (err) {
         reject(err);
         return;
@@ -87,7 +88,7 @@ const addNft = (req, res) => {
       );
       //? Not sure how to handle files in here correctly, since I'll use DB I won't bother
       nfts.push(entry);
-      updateNftsFile()
+      updateFile('nft', nfts)
         .then(() => {
           console.log('✔ Contents of nft.json have been updated');
           res.status(200).json({
@@ -134,7 +135,7 @@ const changeOwner = (req, res) => {
 
       nft.owner = fields.owner;
       console.log(nfts.find((n) => n.id === req.params.id).owner);
-      updateNftsFile()
+      updateFile('nft', nfts)
         .then(() => {
           console.log('✔ Contents of nft.json have been updated');
           res.status(200).json({
@@ -159,19 +160,30 @@ const changeOwner = (req, res) => {
 };
 
 const createContract = (req, res) => {
-  //* Will use "x-www-form-encoded"
-  const form = new formidable.IncomingForm();
-  form.parse(req, (err, fields, files) => {
-    if (err) {
-      console.error(err);
-      return;
-    }
-    const hashedId = encrypt(fields);
-    const entry = {
-      id: hashedId,
-      details: fields,
-    };
-    contracts.push(entry);
+  //* Will use "application/json"
+  const fields = req.body;
+  const fieldsWithId = JSON.stringify(fields) + contracts.length;
+  const hashedId = encrypt(fieldsWithId);
+  const entry = {
+    id: hashedId,
+    details: fields,
+  };
+  contracts.push(entry);
+  updateFile('contracts', contracts).then(() => {
+    console.log('✔ Contents of nft.json have been updated');
+    res
+      .status(200)
+      .json({
+        status: 'success',
+        data: entry,
+      })
+      .catch((err) => {
+        console.log(err);
+        res.status(500).json({
+          status: 'fail',
+          msg: 'internal server error',
+        });
+      });
   });
 };
 
@@ -179,7 +191,5 @@ app.route('/api/v1/nft').get(getAllNfts).post(addNft);
 app.route('/api/v1/nft/:id').get(getNftOfId).patch(changeOwner);
 
 app.route('/api/v1/contract').post(createContract);
-
-//? So far I don't feel like I should have a delete method
 
 app.listen(PORT, () => console.log(`Example app listening on port ${PORT}!`));
