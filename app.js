@@ -3,6 +3,7 @@ const formidable = require('formidable');
 const fs = require('fs');
 const crypto = require('crypto');
 const morgan = require('morgan');
+const { create } = require('domain');
 
 const app = express();
 const PORT = 3000;
@@ -23,6 +24,7 @@ const encrypt = (i) => {
 const dataPathFmt = (name) => `${__dirname}/data/${name}.json`;
 
 const nfts = JSON.parse(fs.readFileSync(dataPathFmt('nft')));
+const contracts = JSON.parse(fs.readFileSync(dataPathFmt('contracts')));
 
 const updateNftsFile = () => {
   return new Promise((resolve, reject) => {
@@ -156,8 +158,27 @@ const changeOwner = (req, res) => {
   }
 };
 
+const createContract = (req, res) => {
+  //* Will use "x-www-form-encoded"
+  const form = new formidable.IncomingForm();
+  form.parse(req, (err, fields, files) => {
+    if (err) {
+      console.error(err);
+      return;
+    }
+    const hashedId = encrypt(fields);
+    const entry = {
+      id: hashedId,
+      details: fields,
+    };
+    contracts.push(entry);
+  });
+};
+
 app.route('/api/v1/nft').get(getAllNfts).post(addNft);
 app.route('/api/v1/nft/:id').get(getNftOfId).patch(changeOwner);
+
+app.route('/api/v1/contract').post(createContract);
 
 //? So far I don't feel like I should have a delete method
 
