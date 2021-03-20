@@ -2,10 +2,12 @@ const express = require('express');
 const formidable = require('formidable');
 const fs = require('fs');
 const crypto = require('crypto');
+const morgan = require('morgan');
 
 const app = express();
 const PORT = 3000;
 
+app.use(morgan('dev'));
 app.use(express.json());
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
