@@ -3,8 +3,6 @@ const formidable = require('formidable');
 const fs = require('fs');
 const crypto = require('crypto');
 const morgan = require('morgan');
-const { create } = require('domain');
-const { json } = require('express');
 
 const app = express();
 const PORT = 3000;
@@ -178,9 +176,35 @@ const createContract = (req, res) => {
   });
 };
 
+const getContract = (req, res) => {
+  //* 64 characters long id isn't necessarily expected, a matching one is enough
+  //* The app should decide how long of a query it will send, 8 seems enough
+
+  //? That's a one way to do it but I want the first characters to match
+  /* const matches = contracts.filter((contract) =>
+    contract.id.includes(req.params.id, 0)
+  ); */
+  const matches = contracts.filter(
+    (contract) => contract.id.slice(0, req.params.id.length) === req.params.id
+  );
+  if (matches.length === 0) {
+    res.status(404).json({
+      status: 'fail',
+      msg: "couldn't find any contract with given ID",
+    });
+    return;
+  }
+  res.status(200).json({
+    status: 'success',
+    results: matches.length,
+    matches: matches,
+  });
+};
+
 app.route('/api/v1/nft').get(getAllNfts).post(addNft);
 app.route('/api/v1/nft/:id').get(getNftOfId).patch(changeOwner);
 
 app.route('/api/v1/contract').post(createContract);
+app.route('/api/v1/contract/:id').get(getContract);
 
 app.listen(PORT, () => console.log(`Example app listening on port ${PORT}!`));
