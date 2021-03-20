@@ -201,10 +201,16 @@ const getContract = (req, res) => {
   });
 };
 
-app.route('/api/v1/nft').get(getAllNfts).post(addNft);
-app.route('/api/v1/nft/:id').get(getNftOfId).patch(changeOwner);
+const nftRouter = express.Router();
+const contractRouter = express.Router();
 
-app.route('/api/v1/contract').post(createContract);
-app.route('/api/v1/contract/:id').get(getContract);
+nftRouter.route('/').get(getAllNfts).post(addNft);
+nftRouter.route('/:id').get(getNftOfId).patch(changeOwner);
+
+contractRouter.route('').post(createContract);
+contractRouter.route('/:id').get(getContract);
+
+app.use('/api/v1/nft', nftRouter);
+app.use('/api/v1/contract', contractRouter);
 
 app.listen(PORT, () => console.log(`Example app listening on port ${PORT}!`));
