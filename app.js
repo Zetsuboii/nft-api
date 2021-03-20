@@ -48,20 +48,20 @@ app.get('/api/v1/nft', (req, res) => {
   });
 });
 
-// TODO: Get the actual id, not the index
 app.get('/api/v1/nft/:id', (req, res) => {
-  if (req.params.id * 1 < nfts.length) {
-    res.status(200).json({
-      status: 'success',
-      results: nfts.length,
-      data: nfts[req.params.id],
-    });
-  } else {
+  const nft = nfts.find((n) => n.id === req.params.id);
+  if (nft === undefined) {
+    console.log('❌ No NFT found with id ' + req.params.id);
     res.status(404).json({
       status: 'fail',
-      msg: 'no object found with given id',
+      msg: 'invalid ID',
     });
+    return;
   }
+  res.status(200).json({
+    status: 'success',
+    data: nft,
+  });
 });
 
 // TODO: Validate with Joi
@@ -85,21 +85,26 @@ app.post('/api/v1/nft', (req, res) => {
       //? Not sure how to handle files in here correctly, since I'll use DB I won't bother
       nfts.push(entry);
       updateNftsFile()
-        .then(() =>
+        .then(() => {
           console.log(
             '✔ Contents of nft.json have been updated'
-          )
-        )
-        .catch((err) => console.log(err));
-      res.status(200).json({
-        status: 'success',
-        data: entry,
-      });
+          );
+          res.status(200).json({
+            status: 'success',
+            data: entry,
+          });
+        })
+        .catch((err) => {
+          console.log(err);
+          res.status(500).json({
+            status: 'fail',
+            msg: 'internal server error',
+          });
+        });
     });
   });
 });
 
-// TODO: Will get sender's id and new owner
 app.patch('/api/v1/nft/:id', (req, res) => {
   //* Works with "x-www-form-encoded"
   const form = new formidable.IncomingForm();
@@ -130,6 +135,9 @@ app.patch('/api/v1/nft/:id', (req, res) => {
       }
 
       nft.owner = fields.owner;
+      console.log(
+        nfts.find((n) => n.id === req.params.id).owner
+      );
       updateNftsFile()
         .then(() => {
           console.log(
@@ -155,6 +163,9 @@ app.patch('/api/v1/nft/:id', (req, res) => {
     });
   }
 });
+
+//? So far I don't feel like I should have a delete method
+
 app.listen(PORT, () =>
   console.log(`Example app listening on port ${PORT}!`)
 );
