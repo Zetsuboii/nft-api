@@ -40,15 +40,15 @@ const updateNftsFile = () => {
 const addBufferIndex = (d) =>
   Buffer.concat([d, Buffer.from(nfts.length + '')]);
 
-app.get('/api/v1/nft', (req, res) => {
+const getAllNfts = (req, res) => {
   res.status(200).json({
     status: 'success',
     results: nfts.length,
     data: nfts,
   });
-});
+};
 
-app.get('/api/v1/nft/:id', (req, res) => {
+const getNftOfId = (req, res) => {
   const nft = nfts.find((n) => n.id === req.params.id);
   if (nft === undefined) {
     console.log('❌ No NFT found with id ' + req.params.id);
@@ -62,10 +62,10 @@ app.get('/api/v1/nft/:id', (req, res) => {
     status: 'success',
     data: nft,
   });
-});
+};
 
 // TODO: Validate with Joi
-app.post('/api/v1/nft', (req, res) => {
+const addNft = (req, res) => {
   //* Works with "form-data"
   const form = new formidable.IncomingForm();
   form.parse(req, (err, fields, files) => {
@@ -73,7 +73,6 @@ app.post('/api/v1/nft', (req, res) => {
       console.error(err.message);
       return;
     }
-    // TODO: Write Promises
     fs.readFile(files.file.path, (err, filePath) => {
       if (err) {
         console.log(err.message);
@@ -103,9 +102,9 @@ app.post('/api/v1/nft', (req, res) => {
         });
     });
   });
-});
+};
 
-app.patch('/api/v1/nft/:id', (req, res) => {
+const changeOwner = (req, res) => {
   //* Works with "x-www-form-encoded"
   const form = new formidable.IncomingForm();
   try {
@@ -162,7 +161,15 @@ app.patch('/api/v1/nft/:id', (req, res) => {
       msg: 'internal server error',
     });
   }
-});
+};
+
+app.get('/api/v1/nft', getAllNfts);
+
+app.get('/api/v1/nft/:id', getNftOfId);
+
+app.post('/api/v1/nft', addNft);
+
+app.patch('/api/v1/nft/:id', changeOwner);
 
 //? So far I don't feel like I should have a delete method
 
