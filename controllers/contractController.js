@@ -13,22 +13,22 @@ exports.createContract = (req, res) => {
     details: fields,
   };
   contracts.push(entry);
-  utils.updateFile(utils.dataPathFmt('contracts'), contracts).then(() => {
-    console.log('✔ Contents of nft.json have been updated');
-    res
-      .status(200)
-      .json({
+  utils
+    .updateFile(utils.dataPathFmt('contracts'), contracts)
+    .then(() => {
+      console.log('✔ Contents of nft.json have been updated');
+      res.status(200).json({
         status: 'success',
         data: entry,
-      })
-      .catch((err) => {
-        console.log(err);
-        res.status(500).json({
-          status: 'fail',
-          msg: 'internal server error',
-        });
       });
-  });
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json({
+        status: 'fail',
+        msg: 'internal server error',
+      });
+    });
 };
 
 exports.getContract = (req, res) => {

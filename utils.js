@@ -3,8 +3,6 @@ const crypto = require('crypto');
 
 const hash = crypto.createHash('sha256');
 
-exports = {};
-
 exports.encrypt = (i) => {
   hash.update(i);
   return hash.digest('hex');
@@ -26,5 +24,3 @@ exports.updateFile = (path, list) => {
     });
   });
 };
-
-module.exports = exports;
