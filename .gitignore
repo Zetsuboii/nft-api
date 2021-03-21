@@ -2,3 +2,5 @@
 /node_modules
 /req.jpeg
 /test.js
+.eslintrc.json
+.gitignore

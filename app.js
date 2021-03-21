@@ -18,4 +18,4 @@ app.use((req, res, next) => {
 app.use('/api/v1/nft', nftRouter);
 app.use('/api/v1/contract', contractRouter);
 
-module.export = app;
+module.exports = app;

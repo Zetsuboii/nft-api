@@ -1,6 +1,6 @@
 const fs = require('fs');
-const utils = require('../utils');
 const formidable = require('formidable');
+const utils = require('../utils');
 
 const nfts = JSON.parse(fs.readFileSync(utils.dataPathFmt('nft')));
 
@@ -16,7 +16,7 @@ exports.getAllNfts = (req, res) => {
 exports.getNftOfId = (req, res) => {
   const nft = nfts.find((n) => n.id === req.params.id);
   if (nft === undefined) {
-    console.log('❌ No NFT found with id ' + req.params.id);
+    console.log(`❌ No NFT found with id ${req.params.id}`);
     res.status(404).json({
       status: 'fail',
       msg: 'invalid ID',
@@ -38,17 +38,19 @@ exports.addNft = (req, res) => {
       console.error(err.message);
       return;
     }
-    fs.readFile(files.file.path, (err, filePath) => {
-      if (err) {
-        console.log(err.message);
+    fs.readFile(files.file.path, (readErr, filePath) => {
+      if (readErr) {
+        console.log(readErr.message);
         return;
       }
       filePath = utils.addBufferIndex(filePath, nfts);
       const hashId = utils.encrypt(filePath);
-      const entry = Object.assign(
-        { id: hashId, createdTime: req.requestTime },
-        fields
-      );
+      const entry = {
+        id: hashId,
+        createdTime: req.requestTime,
+        // eslint-disable-next-line node/no-unsupported-features/es-syntax
+        ...fields,
+      };
       //? Not sure how to handle files in here correctly, since I'll use DB I won't bother
       nfts.push(entry);
       utils
@@ -60,8 +62,8 @@ exports.addNft = (req, res) => {
             data: entry,
           });
         })
-        .catch((err) => {
-          console.log(err);
+        .catch((updateErr) => {
+          console.log(updateErr);
           res.status(500).json({
             status: 'fail',
             msg: 'internal server error',
@@ -73,11 +75,11 @@ exports.addNft = (req, res) => {
 
 exports.changeOwner = (req, res) => {
   //* Works with "application/json"
-  fields = req.body;
+  const fields = req.body;
   const nft = nfts.find((n) => n.id === req.params.id);
 
   if (nft === undefined) {
-    console.log('❌ No NFT found with id ' + req.params.id);
+    console.log(`❌ No NFT found with id ${req.params.id}`);
     res.status(404).json({
       status: 'fail',
       msg: 'invalid ID',
@@ -103,8 +105,6 @@ exports.changeOwner = (req, res) => {
           nft: nft,
         },
       });
-
-      return;
     })
     .catch((err) => {
       console.log(err);
