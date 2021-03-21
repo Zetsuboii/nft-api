@@ -18,5 +18,5 @@ app.use((req, res, next) => {
 app.use('/api/v1/nft', nftRouter);
 app.use('/api/v1/contract', contractRouter);
 
-//? 3) APP
+//? 3) START SERVER
 app.listen(PORT, () => console.log(`Example app listening on port ${PORT}!`));
