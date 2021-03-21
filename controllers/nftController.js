@@ -1,5 +1,5 @@
 const fs = require('fs');
-const utils = require('../utils.js');
+const utils = require('../utils');
 const formidable = require('formidable');
 
 const nfts = JSON.parse(fs.readFileSync(utils.dataPathFmt('nft')));

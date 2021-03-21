@@ -1,5 +1,5 @@
 const fs = require('fs');
-const utils = require('../utils.js');
+const utils = require('../utils');
 
 const contracts = JSON.parse(fs.readFileSync(utils.dataPathFmt('contracts')));
 
