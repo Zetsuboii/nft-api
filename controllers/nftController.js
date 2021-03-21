@@ -4,7 +4,7 @@ const formidable = require('formidable');
 
 const nfts = JSON.parse(fs.readFileSync(utils.dataPathFmt('nft')));
 
-const getAllNfts = (req, res) => {
+exports.getAllNfts = (req, res) => {
   console.log(req.requestTime);
   res.status(200).json({
     status: 'success',
@@ -13,7 +13,7 @@ const getAllNfts = (req, res) => {
   });
 };
 
-const getNftOfId = (req, res) => {
+exports.getNftOfId = (req, res) => {
   const nft = nfts.find((n) => n.id === req.params.id);
   if (nft === undefined) {
     console.log('❌ No NFT found with id ' + req.params.id);
@@ -30,7 +30,7 @@ const getNftOfId = (req, res) => {
 };
 
 // TODO: Validate with Joi
-const addNft = (req, res) => {
+exports.addNft = (req, res) => {
   //* Works with "application/form-data"
   const form = new formidable.IncomingForm();
   form.parse(req, (err, fields, files) => {
@@ -71,7 +71,7 @@ const addNft = (req, res) => {
   });
 };
 
-const changeOwner = (req, res) => {
+exports.changeOwner = (req, res) => {
   //* Works with "application/json"
   fields = req.body;
   const nft = nfts.find((n) => n.id === req.params.id);

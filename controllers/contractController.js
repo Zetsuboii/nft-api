@@ -3,7 +3,7 @@ const utils = require('../utils.js');
 
 const contracts = JSON.parse(fs.readFileSync(utils.dataPathFmt('contracts')));
 
-const createContract = (req, res) => {
+exports.createContract = (req, res) => {
   //* Will use "application/json"
   const fields = req.body;
   const fieldsWithId = JSON.stringify(fields) + contracts.length;
@@ -31,7 +31,7 @@ const createContract = (req, res) => {
   });
 };
 
-const getContract = (req, res) => {
+exports.getContract = (req, res) => {
   //* 64 characters long id isn't necessarily expected, a matching one is enough
   //* The app should decide how long of a query it will send, 8 seems enough
 
