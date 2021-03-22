@@ -13,19 +13,25 @@ exports.getAllNfts = async (req, res) => {
   });
 };
 
-exports.getNftOfId = (req, res) => {
-  /* const nft = nfts.find((n) => n.id === req.params.id);
-  if (nft === undefined) {
+exports.getNftOfId = async (req, res) => {
+  console.log(req.params.id);
+  const matchNft = await Nft.find({
+    hashedId: req.params.id,
+  });
+  console.log(typeof matchNft);
+  console.log(matchNft.length);
+  // const matchNft = await Nft.find().where('hashedId').equals(req.params.id);
+  if (matchNft.length === 0) {
     console.log(`❌ No NFT found with id ${req.params.id}`);
     res.status(404).json({
       status: 'fail',
       msg: 'invalid ID',
     });
     return;
-  } */
+  }
   res.status(200).json({
     status: 'success',
-    //data: nft,
+    data: matchNft,
   });
 };
 
