@@ -1,20 +1,20 @@
 const fs = require('fs');
 const formidable = require('formidable');
+
+const Nft = require('../models/nft/nftModel');
 const utils = require('../utils');
 
-const nfts = JSON.parse(fs.readFileSync(utils.dataPathFmt('nft')));
-
-exports.getAllNfts = (req, res) => {
-  console.log(req.requestTime);
+exports.getAllNfts = async (req, res) => {
+  const results = await Nft.find();
   res.status(200).json({
     status: 'success',
-    results: nfts.length,
-    data: nfts,
+    results: results.length,
+    data: results,
   });
 };
 
 exports.getNftOfId = (req, res) => {
-  const nft = nfts.find((n) => n.id === req.params.id);
+  /* const nft = nfts.find((n) => n.id === req.params.id);
   if (nft === undefined) {
     console.log(`❌ No NFT found with id ${req.params.id}`);
     res.status(404).json({
@@ -22,51 +22,50 @@ exports.getNftOfId = (req, res) => {
       msg: 'invalid ID',
     });
     return;
-  }
+  } */
   res.status(200).json({
     status: 'success',
-    data: nft,
+    //data: nft,
   });
 };
 
-// TODO: Validate with Joi
-exports.addNft = (req, res) => {
-  //* Works with "application/form-data"
+exports.addNft = async (req, res) => {
+  //* Works with "form-data"
   const form = new formidable.IncomingForm();
   form.parse(req, (err, fields, files) => {
     if (err) {
       console.error(err.message);
       return;
     }
-    fs.readFile(files.file.path, (readErr, filePath) => {
+    fs.readFile(files.file.path, (readErr, file) => {
       if (readErr) {
-        console.log(readErr.message);
+        console.error(readErr);
         return;
       }
-      filePath = utils.addBufferIndex(filePath, nfts);
-      const hashId = utils.encrypt(filePath);
+      const nftsLength = Nft.find().length;
+      const fileWithIndex = utils.addBufferIndex(file, nftsLength);
+      const hashedId = utils.encrypt(fileWithIndex);
+
       const entry = {
-        id: hashId,
-        createdTime: req.requestTime,
-        // eslint-disable-next-line node/no-unsupported-features/es-syntax
-        ...fields,
+        id: hashedId,
+        createdTime: new Date(),
+        name: fields.name,
+        price: fields.price,
+        owner: fields.owner,
+        file: file,
       };
-      //? Not sure how to handle files in here correctly, since I'll use DB I won't bother
-      nfts.push(entry);
-      utils
-        .updateFile(utils.dataPathFmt('nft'), nfts)
+
+      const newNft = Nft.create(entry)
         .then(() => {
-          console.log('✔ Contents of nft.json have been updated');
           res.status(200).json({
             status: 'success',
-            data: entry,
+            data: newNft,
           });
         })
-        .catch((updateErr) => {
-          console.log(updateErr);
+        .catch((createErr) => {
           res.status(500).json({
             status: 'fail',
-            msg: 'internal server error',
+            msg: createErr,
           });
         });
     });
@@ -75,26 +74,26 @@ exports.addNft = (req, res) => {
 
 exports.changeOwner = (req, res) => {
   //* Works with "application/json"
-  const fields = req.body;
-  const nft = nfts.find((n) => n.id === req.params.id);
+  //const fields = req.body;
+  //const nft = nfts.find((n) => n.id === req.params.id);
 
-  if (nft === undefined) {
+  /* if (nft === undefined) {
     console.log(`❌ No NFT found with id ${req.params.id}`);
     res.status(404).json({
       status: 'fail',
       msg: 'invalid ID',
     });
-  }
+  } */
 
-  if (fields.address !== nft.owner) {
+  /* if (fields.address !== nft.owner) {
     res.status(403).json({
       status: 'fail',
       msg: "can't change the ownership of the NFT you don't own",
     });
     return;
-  }
+  } */
 
-  nft.owner = fields.owner;
+  /* nft.owner = fields.owner;
   utils
     .updateFile(utils.dataPathFmt('nft'), nfts)
     .then(() => {
@@ -112,5 +111,11 @@ exports.changeOwner = (req, res) => {
         status: 'fail',
         msg: 'internal server error',
       });
-    });
+    }); */
+  res.status(200).json({
+    status: 'success',
+    data: {
+      //nft: nft,
+    },
+  });
 };

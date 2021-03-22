@@ -17,12 +17,16 @@ const nftSchema = new mongoose.Schema({
     required: [true, nftMissing('name')],
   },
   price: {
-    type: Number,
+    type: String,
     required: [true, nftMissing('price')],
   },
   owner: {
     type: String,
     required: [true, nftMissing('owner')],
+  },
+  file: {
+    type: Buffer,
+    required: [true, nftMissing('file')],
   },
 });
 

@@ -10,8 +10,8 @@ exports.encrypt = (i) => {
 
 exports.dataPathFmt = (name) => `${__dirname}/data/${name}.json`;
 
-exports.addBufferIndex = (data, list) =>
-  Buffer.concat([data, Buffer.from(`${list.length}`)]);
+exports.addBufferIndex = (data, listLength) =>
+  Buffer.concat([data, Buffer.from(`${listLength}`)]);
 
 exports.updateFile = (path, list) =>
   new Promise((resolve, reject) => {
