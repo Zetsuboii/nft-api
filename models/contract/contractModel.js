@@ -18,7 +18,7 @@ const contractSchema = new mongoose.Schema({
   },
   owner: {
     type: String,
-    required: [true, nftMissing('owner')],
+    required: [true, contractMissing('owner')],
   },
 });
 
