@@ -14,12 +14,10 @@ exports.getAllNfts = async (req, res) => {
 };
 
 exports.getNftOfId = async (req, res) => {
-  console.log(req.params.id);
   const matchNft = await Nft.find({
     hashedId: req.params.id,
   });
-  console.log(typeof matchNft);
-  console.log(matchNft.length);
+  //? This is an another way to do it
   // const matchNft = await Nft.find().where('hashedId').equals(req.params.id);
 
   if (matchNft.length === 0) {
@@ -92,11 +90,6 @@ exports.changeOwner = async (req, res) => {
     if (nftMatch.owner === req.body.address) {
       nftMatch.owner = req.body.owner;
       nftMatch.save();
-      /* const newNft = Nft.findOneAndUpdate(
-        { hashedId: req.params.id },
-        { owner: req.body.newOwner },
-        { new: true }
-      ); */
       res.status(200).json({
         status: 'success',
         data: nftMatch,
@@ -109,42 +102,4 @@ exports.changeOwner = async (req, res) => {
       msg: err.message,
     });
   }
-  //const fields = req.body;
-  //const nft = nfts.find((n) => n.id === req.params.id);
-
-  /* if (nft === undefined) {
-    console.log(`❌ No NFT found with id ${req.params.id}`);
-    res.status(404).json({
-      status: 'fail',
-      msg: 'invalid ID',
-    });
-  } */
-
-  /* if (fields.address !== nft.owner) {
-    res.status(403).json({
-      status: 'fail',
-      msg: "can't change the ownership of the NFT you don't own",
-    });
-    return;
-  } */
-
-  /* nft.owner = fields.owner;
-  utils
-    .updateFile(utils.dataPathFmt('nft'), nfts)
-    .then(() => {
-      console.log('✔ Contents of nft.json have been updated');
-      res.status(200).json({
-        status: 'success',
-        data: {
-          nft: nft,
-        },
-      });
-    })
-    .catch((err) => {
-      console.log(err);
-      res.status(500).json({
-        status: 'fail',
-        msg: 'internal server error',
-      });
-    }); */
 };
