@@ -4,6 +4,7 @@ const utils = require('../utils');
 const Contract = require('../models/contract/contractModel');
 
 exports.createContract = async (req, res) => {
+  const message = {};
   //* Will use "application/json"
   const fields = req.body;
 
@@ -43,7 +44,7 @@ exports.getContract = async (req, res) => {
   if (matches.length === 0) {
     res.status(404).json({
       status: 'fail',
-      msg: "couldn't find any contract with given ID",
+      msg: 'invalid ID',
     });
     return;
   }

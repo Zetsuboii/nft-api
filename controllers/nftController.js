@@ -14,14 +14,13 @@ exports.getAllNfts = async (req, res) => {
 };
 
 exports.getNftOfId = async (req, res) => {
-  const matchNft = await Nft.find({
+  const matchNft = await Nft.findOne({
     hashedId: req.params.id,
   });
   //? This is an another way to do it
   // const matchNft = await Nft.find().where('hashedId').equals(req.params.id);
 
   if (matchNft.length === 0) {
-    console.log(`❌ No NFT found with id ${req.params.id}`);
     res.status(404).json({
       status: 'fail',
       msg: 'invalid ID',
@@ -30,7 +29,7 @@ exports.getNftOfId = async (req, res) => {
   }
   res.status(200).json({
     status: 'success',
-    data: matchNft,
+    data: { ...matchNft, file: '[File Object]' },
   });
 };
 
@@ -44,7 +43,7 @@ exports.addNft = async (req, res) => {
     }
     fs.readFile(files.file.path, async (readErr, file) => {
       if (readErr) {
-        console.error(readErr);
+        console.error(readErr.message);
         return;
       }
       const nftsLength = (await Nft.find()).length;
@@ -60,7 +59,7 @@ exports.addNft = async (req, res) => {
         file: file,
       };
 
-      const newNft = Nft.create(entry)
+      Nft.create(entry)
         .then(() => {
           res.status(200).json({
             status: 'success',
@@ -95,7 +94,7 @@ exports.changeOwner = async (req, res) => {
         data: nftMatch,
       });
     }
-    throw "Couldn't find nft";
+    throw 'no NFT found';
   } catch (err) {
     res.status(400).json({
       status: 'fail',
