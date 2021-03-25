@@ -2,7 +2,6 @@ const fs = require('fs');
 const utils = require('../utils');
 
 const Contract = require('../models/contract/contractModel');
-const contracts = JSON.parse(fs.readFileSync(utils.dataPathFmt('contracts')));
 
 exports.createContract = async (req, res) => {
   //* Will use "application/json"
