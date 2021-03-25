@@ -16,6 +16,8 @@ if (process.env.NODE_ENV === 'dev') {
 
 app.use(express.json());
 
+app.use('/get', express.static('data'));
+
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
   next();

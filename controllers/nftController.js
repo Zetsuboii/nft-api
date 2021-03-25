@@ -50,6 +50,16 @@ exports.addNft = async (req, res) => {
       const fileWithIndex = utils.addBufferIndex(file, nftsLength);
       const hashedId = utils.encrypt(fileWithIndex);
 
+      fs.writeFile(`${__dirname}/../data/${hashedId}.jpg`, file, (err) => {
+        if (err) {
+          console.error(err.message);
+          return;
+        }
+        console.log(
+          `✔ Contents of the file has been written to ${hashedId}.jpg`
+        );
+      });
+
       const entry = {
         hashedId: hashedId,
         createdTime: new Date(),
