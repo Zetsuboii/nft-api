@@ -1,9 +1,8 @@
 const fs = require('fs');
 const crypto = require('crypto');
 
-const hash = crypto.createHash('sha256');
-
 exports.encrypt = (i) => {
+  const hash = crypto.createHash('sha256');
   hash.update(i);
   return hash.digest('hex');
 };

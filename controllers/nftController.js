@@ -37,17 +37,17 @@ exports.getNftOfId = async (req, res) => {
 exports.addNft = async (req, res) => {
   //* Works with "form-data"
   const form = new formidable.IncomingForm();
-  form.parse(req, (err, fields, files) => {
+  form.parse(req, async (err, fields, files) => {
     if (err) {
       console.error(err.message);
       return;
     }
-    fs.readFile(files.file.path, (readErr, file) => {
+    fs.readFile(files.file.path, async (readErr, file) => {
       if (readErr) {
         console.error(readErr);
         return;
       }
-      const nftsLength = Nft.find().length;
+      const nftsLength = (await Nft.find()).length;
       const fileWithIndex = utils.addBufferIndex(file, nftsLength);
       const hashedId = utils.encrypt(fileWithIndex);
 
@@ -64,7 +64,7 @@ exports.addNft = async (req, res) => {
         .then(() => {
           res.status(200).json({
             status: 'success',
-            data: entry,
+            data: { ...entry, file: '[File Object]' },
           });
         })
         .catch((createErr) => {
