@@ -9,4 +9,6 @@ router
   .get(nftController.getNftOfId)
   .patch(nftController.changeOwner);
 
+router.route('/from/:address').get(nftController.getNftsOf);
+
 module.exports = router;

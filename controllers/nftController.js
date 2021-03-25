@@ -112,3 +112,17 @@ exports.changeOwner = async (req, res) => {
     });
   }
 };
+
+exports.getNftsOf = async (req, res) => {
+  matchNfts = await Nft.find({ owner: req.params.address });
+  if (matchNfts.length === 0) {
+    res.status(404).json({
+      status: 'fail',
+      msg: 'address has no NFTs or invalid adress',
+    });
+  }
+  res.status(200).json({
+    status: 'success',
+    items: matchNfts,
+  });
+};
