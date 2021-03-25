@@ -1,32 +1,32 @@
 const fs = require('fs');
 const utils = require('../utils');
 
+const Contract = require('../models/contract/contractModel');
 const contracts = JSON.parse(fs.readFileSync(utils.dataPathFmt('contracts')));
 
-exports.createContract = (req, res) => {
+exports.createContract = async (req, res) => {
   //* Will use "application/json"
   const fields = req.body;
-  const fieldsWithId = JSON.stringify(fields) + contracts.length;
+  const contractLength = (await Contract.find()).length;
+  const fieldsWithId = JSON.stringify(fields) + contractLength;
   const hashedId = utils.encrypt(fieldsWithId);
   const entry = {
-    id: hashedId,
-    details: fields,
+    hashedId: hashedId,
+    createdTime: new Date(),
+    name: fields.name,
+    owner: fields.owner,
   };
-  contracts.push(entry);
-  utils
-    .updateFile(utils.dataPathFmt('contracts'), contracts)
+  Contract.create(entry)
     .then(() => {
-      console.log('✔ Contents of nft.json have been updated');
       res.status(200).json({
         status: 'success',
         data: entry,
       });
     })
-    .catch((err) => {
-      console.log(err);
+    .catch((createErr) => {
       res.status(500).json({
         status: 'fail',
-        msg: 'internal server error',
+        msg: createErr,
       });
     });
 };
