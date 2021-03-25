@@ -21,6 +21,7 @@ exports.getNftOfId = async (req, res) => {
   console.log(typeof matchNft);
   console.log(matchNft.length);
   // const matchNft = await Nft.find().where('hashedId').equals(req.params.id);
+
   if (matchNft.length === 0) {
     console.log(`❌ No NFT found with id ${req.params.id}`);
     res.status(404).json({
@@ -53,7 +54,7 @@ exports.addNft = async (req, res) => {
       const hashedId = utils.encrypt(fileWithIndex);
 
       const entry = {
-        id: hashedId,
+        hashedId: hashedId,
         createdTime: new Date(),
         name: fields.name,
         price: fields.price,
@@ -65,7 +66,7 @@ exports.addNft = async (req, res) => {
         .then(() => {
           res.status(200).json({
             status: 'success',
-            data: newNft,
+            data: entry,
           });
         })
         .catch((createErr) => {
@@ -78,8 +79,36 @@ exports.addNft = async (req, res) => {
   });
 };
 
-exports.changeOwner = (req, res) => {
+exports.changeOwner = async (req, res) => {
   //* Works with "application/json"
+  try {
+    console.log(req.params.id);
+    const nftMatch = await Nft.findOne({
+      hashedId: req.params.id,
+    });
+    console.log(nftMatch);
+    console.log(nftMatch.owner);
+    console.log(req.body.owner);
+    if (nftMatch.owner === req.body.address) {
+      nftMatch.owner = req.body.owner;
+      nftMatch.save();
+      /* const newNft = Nft.findOneAndUpdate(
+        { hashedId: req.params.id },
+        { owner: req.body.newOwner },
+        { new: true }
+      ); */
+      res.status(200).json({
+        status: 'success',
+        data: nftMatch,
+      });
+    }
+    throw "Couldn't find nft";
+  } catch (err) {
+    res.status(400).json({
+      status: 'fail',
+      msg: err.message,
+    });
+  }
   //const fields = req.body;
   //const nft = nfts.find((n) => n.id === req.params.id);
 
@@ -118,10 +147,4 @@ exports.changeOwner = (req, res) => {
         msg: 'internal server error',
       });
     }); */
-  res.status(200).json({
-    status: 'success',
-    data: {
-      //nft: nft,
-    },
-  });
 };
